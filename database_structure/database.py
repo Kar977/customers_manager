@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
+from contextlib import contextmanager
 
 
 def get_engine(user: str, password: str, host: str, port: str, db: str):
@@ -15,15 +16,17 @@ def get_engine(user: str, password: str, host: str, port: str, db: str):
     return engine
 
 
-db_engine = get_engine('postgres', 'password', 'localhost', '5432', 'postgresV3')
+db_engine = get_engine('postgres', 'password', 'localhost', '5432', 'postgresV4')
 
 
 SessionLocal = sessionmaker(bind=db_engine)
+SecondSessionLocal = sessionmaker(bind=db_engine)
 
 
 print("przed get db")
 
 
+#@contextmanager
 def get_db():
     session = SessionLocal()
     try:

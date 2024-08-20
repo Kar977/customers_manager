@@ -1,63 +1,64 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
-from database_structure.models import Customer, WorkDay
+
+from customers.schemas import CreateVisitRequest, DeleteCustomerRequest, SetSlotAvailableRequest, CreateWorkdayRequest, DeleteWorkdayRequest, DeleteSlotRequest
 from database_structure.database import get_db, SessionLocal
+from sqlalchemy.sql import exists
+from customers.services.crud import customers_manager_obj, workday_manager_obj, visitation_manager_obj
+from fastapi.exceptions import HTTPException
 
 router = APIRouter(prefix="/customers")
 
 
-@router.get("/view/available/slots/on/{slot_date}/")
+@router.get("/slots/all/available/")
+async def view_all_open_dates_with_at_least_one_slot_available(request: Request, db: SessionLocal = Depends(get_db)):
+
+    return visitation_manager_obj.get_all_available_slots(db)
+
+
+@router.get("/slots/{slot_date}/available/")
 async def view_free_slots_on_specific_day(request: Request, slot_date: str, db: SessionLocal = Depends(get_db)):
 
-    available_slots_query = db.query(WorkDay).filter(WorkDay.slot_status == 'available', WorkDay.date == slot_date).all()
-
-    available_slots_list = []
-
-    for slot_obj in available_slots_query:
-        available_slots_list.append(slot_obj.slot_nbr)
-
-    return JSONResponse({'available slots': available_slots_list})
+    available_slots = visitation_manager_obj.read_all_available_hours_on_specific_date(slot_date, db)
+    return JSONResponse({slot_date: available_slots})
 
 
-@router.get("/create/visit/{name}/{phone_nbr}/{date}/{slot}/")  # ToDo change GET method to POST
-async def create_visit(request: Request, name: str, phone_nbr: int, date: str, slot: str, db: SessionLocal = Depends(get_db)):
-    check_if_user_history_exist = db.query(Customer).filter(Customer.name == name,
-                                                            Customer.phone_number == phone_nbr).first()
+@router.post("/visit/", status_code=201)
+async def create_visit(new_visit: CreateVisitRequest, db: SessionLocal = Depends(get_db)):
 
-    if check_if_user_history_exist is None:
-        print('is non -check-')
-        customer = Customer(name=name, phone_number=phone_nbr)  # , slots=new_visit_obj)
-        db.add(customer)
-        db.commit()
-    else:
-        print("is existing -check-")
-        customer = db.query(Customer).filter(Customer.name == name, Customer.phone_number == phone_nbr).first()
-        print("details of existing customer -check- ", customer)
+    visit_reservation = visitation_manager_obj.reserve_visitation(new_visit.name, new_visit.phone_nbr,
+                                                                  new_visit.date, new_visit.slot,
+                                                                  db)
 
-    print('customer id -- ', customer.id)
-
-    check_if_visit_available = db.query(WorkDay).filter(WorkDay.date == date, WorkDay.slot_nbr == slot).first()
-
-    if check_if_visit_available.slot_status == "unavailable":
-        return JSONResponse({"status": "fail",
-                             "detail": "That slot is already taken,"
-                                       " choose different slot for you visit"})
-
-    new_visit = db.query(WorkDay).filter(WorkDay.date == date, WorkDay.slot_nbr == slot).first()
-    new_visit.slot_status = 'unavailable'
-    new_visit.customer_id = customer.id
-
-    db.add(new_visit)
-    db.commit()
-
-    return JSONResponse({"visit_date": str(new_visit.date), "visit_slot":new_visit.slot_nbr, "phone_number": customer.phone_number})
+    return visit_reservation
 
 
-@router.delete("/delete/visit/{name}/{last_name}/{phone_nbr}/{date}/{slot}/")
-async def delete_visit():
-    pass
+@router.delete("/customer/", status_code=204)
+async def delete_customer(customer_request: DeleteCustomerRequest, db: SessionLocal = Depends(get_db)):
+
+    return customers_manager_obj.delete_customer_and_release_slots(id_nbr=customer_request.user_id, db=db)
 
 
-@router.post("move/visit/{name}/{last_name}/{phone_nbr}/{date}/{slot}/{new_date}/{new_slot}/")
-async def move_visit():
-    pass
+@router.put("/slot/set/available/") #tez moge zrobic tylko /slot/ ?
+async def set_slot_available(slot_request: SetSlotAvailableRequest, db: SessionLocal = Depends(get_db)):
+
+    return workday_manager_obj.put_slot_to_available(slot_id=slot_request.slot_id, db=db)
+
+
+@router.delete("/slot/")
+async def delete_slot(slot_request: DeleteSlotRequest, db: SessionLocal = Depends(get_db)):
+
+    return workday_manager_obj.delete_slot(slot_id=slot_request.slot_id, db=db)
+
+
+@router.post("/workday/", status_code=201)
+async def create_workday(workday_request: CreateWorkdayRequest, db: SessionLocal = Depends(get_db)):
+
+    return workday_manager_obj.create_workday(date=workday_request.date, day_status=workday_request.day_status, db=db)
+
+
+@router.delete("/workday/", status_code=204)
+async def delete_workday(workday_request: DeleteWorkdayRequest, db: SessionLocal = Depends(get_db)):
+
+    return workday_manager_obj.delete_workday(workday_id=workday_request.workday_id, db=db)
+
