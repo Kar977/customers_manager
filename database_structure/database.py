@@ -5,7 +5,7 @@ from sqlalchemy_utils import database_exists, create_database
 
 def get_engine(user: str, password: str, host: str, port: str, db: str):
 
-    database_url = f'postgresql://{user}:{password}@{host}:{port}/{db}'
+    database_url = f"postgresql://{user}:{password}@{host}:{port}/{db}"
 
     if database_exists(database_url) == False:
         create_database(database_url)
@@ -15,13 +15,11 @@ def get_engine(user: str, password: str, host: str, port: str, db: str):
     return engine
 
 
-db_engine = get_engine('postgres', 'password', 'localhost', '5432', 'postgresV3')
+db_engine = get_engine("postgres", "password", "localhost", "5432", "postgresV4")
 
 
 SessionLocal = sessionmaker(bind=db_engine)
-
-
-print("przed get db")
+SecondSessionLocal = sessionmaker(bind=db_engine)
 
 
 def get_db():
@@ -30,7 +28,3 @@ def get_db():
         yield session
     finally:
         session.close()
-
-print("po get db")
-
-
