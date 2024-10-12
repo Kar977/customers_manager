@@ -1,9 +1,12 @@
-from database_structure.models import Customer, Slot, WorkDay, SlotToHour
-from sqlalchemy.sql import exists
 from fastapi.responses import JSONResponse
-from fastapi.exceptions import HTTPException
-from fastapi import Request
-from customers.services.exceptions import ResourceDoesNotExistException, WrongStatusException, ResourceAlreadyExistException
+from sqlalchemy.sql import exists
+
+from customers.services.exceptions import (
+    ResourceDoesNotExistException,
+    WrongStatusException,
+    ResourceAlreadyExistException,
+)
+from database_structure.models import Customer, Slot, WorkDay, SlotToHour
 
 
 class VisitationManager:
@@ -14,18 +17,28 @@ class VisitationManager:
 
     def reserve_visitation(self, name, phone_nbr, date, slot, db):
 
-        customer_obj = self.customers_manager.get_or_create_customer(name, phone_nbr, db)
+        customer_obj = self.customers_manager.get_or_create_customer(
+            name, phone_nbr, db
+        )
         return self.workday_manager.create_reservation(date, slot, customer_obj, db)
 
     def read_all_available_hours_on_specific_date(self, date, db):
-        workday_obj = self.workday_manager.get_all_slot_nbr_if_available_or_fail(date, db)
+        workday_obj = self.workday_manager.get_all_slot_nbr_if_available_or_fail(
+            date, db
+        )
         return self.workday_manager.convert_slot_list_into_hours(workday_obj, db)
 
     def get_all_available_slots(self, db):
 
         available_slots_per_date_dict = {}
 
-        available_slots = db.query(WorkDay, Slot, SlotToHour).filter(Slot.slot_status == "available").filter(WorkDay.id == Slot.workday_id).filter(Slot.slot_nbr == SlotToHour.slot_nbr).all()
+        available_slots = (
+            db.query(WorkDay, Slot, SlotToHour)
+            .filter(Slot.slot_status == "available")
+            .filter(WorkDay.id == Slot.workday_id)
+            .filter(Slot.slot_nbr == SlotToHour.slot_nbr)
+            .all()
+        )
 
         for obj in available_slots:
 
@@ -43,7 +56,11 @@ class CustomersManager:
         pass
 
     def get_or_create_customer(self, name, phone_nbr, db):
-        found_user = db.query(Customer).filter(Customer.name == name, Customer.phone_number == phone_nbr).first()
+        found_user = (
+            db.query(Customer)
+            .filter(Customer.name == name, Customer.phone_number == phone_nbr)
+            .first()
+        )
         if found_user is None:
             customer = Customer(name=name, phone_number=phone_nbr)
             db.add(customer)
@@ -56,9 +73,13 @@ class CustomersManager:
         customer = db.query(Customer).filter(Customer.id == id_nbr).first()
 
         if customer is None:
-            raise ResourceDoesNotExistException(resource_name="customer", unit="ID", identification_mark=str(id_nbr))
+            raise ResourceDoesNotExistException(
+                resource_name="customer", unit="ID", identification_mark=str(id_nbr)
+            )
 
-        slots_with_the_customer_reservation = db.query(Slot).filter(Slot.customer_id == customer.id).all()
+        slots_with_the_customer_reservation = (
+            db.query(Slot).filter(Slot.customer_id == customer.id).all()
+        )
 
         slots_deleted = len(slots_with_the_customer_reservation)
 
@@ -68,8 +89,14 @@ class CustomersManager:
         db.delete(customer)
         db.commit()
 
-        return JSONResponse({"action": "customer deleted", "customer_id": id_nbr,
-                             "slots_deleted": slots_deleted}, status_code=204)
+        return JSONResponse(
+            {
+                "action": "customer deleted",
+                "customer_id": id_nbr,
+                "slots_deleted": slots_deleted,
+            },
+            status_code=200,
+        )
 
 
 class WorkdayManager:
@@ -79,7 +106,9 @@ class WorkdayManager:
         workday = db.query(exists().where(WorkDay.date == date)).scalar()
 
         if workday is False:
-            raise ResourceDoesNotExistException(resource_name="WorkDay", unit="date", identification_mark=str(date))
+            raise ResourceDoesNotExistException(
+                resource_name="WorkDay", unit="date", identification_mark=str(date)
+            )
 
         workday = db.query(WorkDay).filter(WorkDay.date == date).first()
 
@@ -90,10 +119,16 @@ class WorkdayManager:
 
     def get_slot_if_available_or_fail(self, workday, slot_nbr, db):
 
-        slot = db.query(Slot).filter(Slot.workday_id == workday.id, Slot.slot_nbr == slot_nbr).first()
+        slot = (
+            db.query(Slot)
+            .filter(Slot.workday_id == workday.id, Slot.slot_nbr == slot_nbr)
+            .first()
+        )
 
         if slot is None:
-            raise ResourceDoesNotExistException(resource_name="slot", unit="WorkDay ID", identification_mark=workday.id)
+            raise ResourceDoesNotExistException(
+                resource_name="slot", unit="WorkDay ID", identification_mark=workday.id
+            )
         if slot.slot_status == "unavailable":
             raise WrongStatusException(resource_name="slot", status="unavailable")
         return slot
@@ -101,10 +136,18 @@ class WorkdayManager:
     def get_all_slot_nbr_if_available_or_fail(self, date, db):
 
         workday = self.get_workday_if_exsist_and_open_or_fail(date, db)
-        available_slots = db.query(Slot).filter(Slot.workday_id == workday.id, Slot.slot_status == "available").all()
+        available_slots = (
+            db.query(Slot)
+            .filter(Slot.workday_id == workday.id, Slot.slot_status == "available")
+            .all()
+        )
 
         if available_slots is None:
-            raise ResourceDoesNotExistException(resource_name="slot", unit="available status and date", identification_mark=str(date))
+            raise ResourceDoesNotExistException(
+                resource_name="slot",
+                unit="available status and date",
+                identification_mark=str(date),
+            )
 
         available_slots_list = []
 
@@ -118,7 +161,9 @@ class WorkdayManager:
         hours_list = []
 
         for slot in slots:
-            hour_query = db.query(SlotToHour).filter(SlotToHour.slot_nbr == slot).first()
+            hour_query = (
+                db.query(SlotToHour).filter(SlotToHour.slot_nbr == slot).first()
+            )
             hours_list.append(hour_query.hour)
 
         return hours_list
@@ -139,9 +184,19 @@ class WorkdayManager:
         slot_obj.customer_id = customer_obj.id
         db.commit()
 
-        hour_of_booked_visit = db.query(SlotToHour).filter(SlotToHour.slot_nbr == slot_nbr).first()
+        hour_of_booked_visit = (
+            db.query(SlotToHour).filter(SlotToHour.slot_nbr == slot_nbr).first()
+        )
 
-        return JSONResponse({"action": "visitation reserved", "customer_id": f"{customer_obj.id}", "hour": f"{hour_of_booked_visit.hour}", "date": f"{date}", "slot_nbr": f"{slot_nbr}"})
+        return JSONResponse(
+            {
+                "action": "visitation reserved",
+                "customer_id": f"{customer_obj.id}",
+                "hour": f"{hour_of_booked_visit.hour}",
+                "date": f"{date}",
+                "slot_nbr": f"{slot_nbr}",
+            }
+        )
 
     def get_all_workdays_obj_if_open(self, db):
         open_days = db.query(WorkDay).filter(WorkDay.day_status == "open").all()
@@ -161,7 +216,9 @@ class WorkdayManager:
         slot_obj = db.query(Slot).filter(Slot.id == slot_id).first()
 
         if not slot_obj:
-            raise ResourceDoesNotExistException(resource_name="slot", unit="ID", identification_mark=str(slot_id))
+            raise ResourceDoesNotExistException(
+                resource_name="slot", unit="ID", identification_mark=str(slot_id)
+            )
         if slot_obj.slot_status == "available":
             raise WrongStatusException(resource_name="slot", status="available")
 
@@ -170,17 +227,21 @@ class WorkdayManager:
 
         db.commit()
 
-        return JSONResponse({"detail": f"resource with ID = {slot_id} updated successfully"}, status_code=204)
+        return JSONResponse(
+            {"detail": f"resource with ID = {slot_id} updated successfully"},
+            status_code=200,
+        )
 
     def delete_slot(self, slot_id, db):
         slot_obj = db.query(Slot).filter(Slot.id == slot_id).first()
 
         if not slot_obj:
-            raise ResourceDoesNotExistException(resource_name="slot", unit="ID", identification_mark=str(slot_id))
+            raise ResourceDoesNotExistException(
+                resource_name="slot", unit="ID", identification_mark=str(slot_id)
+            )
 
         db.delete(slot_obj)
         db.commit()
-
 
         return JSONResponse({"action": "slot deleted", "slot_id": f"{slot_id}"})
 
@@ -188,25 +249,39 @@ class WorkdayManager:
 
         found_workday = db.query(WorkDay).filter(WorkDay.date == date).first()
         if found_workday:
-            raise ResourceAlreadyExistException(resource_name="workday", unit="date", identification_mark=str(date))
+            raise ResourceAlreadyExistException(
+                resource_name="workday", unit="date", identification_mark=str(date)
+            )
 
         new_workday = WorkDay(date=date, day_status=day_status)
         db.add(new_workday)
         db.commit()
 
-        return JSONResponse({"action": "workday_created", "workday_id": f"{new_workday.id}", "date": f"{date}"}, status_code=202)
+        return JSONResponse(
+            {
+                "action": "workday_created",
+                "workday_id": f"{new_workday.id}",
+                "date": f"{date}",
+            },
+            status_code=202,
+        )
 
     def delete_workday(self, workday_id, db):
 
         found_workday = db.query(WorkDay).filter(WorkDay.id == workday_id).first()
 
         if not found_workday:
-            raise ResourceDoesNotExistException(resource_name="workday", unit="ID", identification_mark=str(workday_id))
+            raise ResourceDoesNotExistException(
+                resource_name="workday", unit="ID", identification_mark=str(workday_id)
+            )
 
         db.delete(found_workday)
         db.commit()
 
-        return JSONResponse({"action": "workday_deleted", "workday_id": f"{workday_id}"}, status_code=202)
+        return JSONResponse(
+            {"action": "workday_deleted", "workday_id": f"{workday_id}"},
+            status_code=202,
+        )
 
 
 visitation_manager_obj = VisitationManager()

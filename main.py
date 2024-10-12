@@ -1,10 +1,11 @@
 from fastapi import FastAPI
+from fastapi import Request
+from fastapi.exceptions import HTTPException
+from fastapi.responses import JSONResponse
 
 from customers import routers as customer_router
-from customers.services.exceptions import ResourceDoesNotExistException, ResourceAlreadyExistException, WrongStatusException
-from fastapi.responses import JSONResponse
-from fastapi.exceptions import HTTPException
-from fastapi import Request
+from customers.services.exceptions import ResourceDoesNotExistException, ResourceAlreadyExistException, \
+    WrongStatusException
 
 app = FastAPI()
 

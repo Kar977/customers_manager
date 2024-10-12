@@ -27,4 +27,3 @@ class ResourceAlreadyExistException(HTTPException):
     def __init__(self, resource_name: str, unit: str, identification_mark: str):
         detail = f"resource {resource_name} with {unit} = {identification_mark} already exist"
         super().__init__(status_code=self.status_code, detail=detail)
-
