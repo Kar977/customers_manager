@@ -1,6 +1,3 @@
-from fastapi import APIRouter, Depends, Request
-from fastapi.responses import JSONResponse
-
 from customers.schemas import (
     CreateVisitRequest,
     DeleteCustomerRequest,
@@ -15,6 +12,8 @@ from customers.services.crud import (
     visitation_manager_obj,
 )
 from database_structure.database import get_db, SessionLocal
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import JSONResponse
 
 router = APIRouter(prefix="/customers")
 

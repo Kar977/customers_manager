@@ -1,11 +1,21 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 
-def get_engine(user: str, password: str, host: str, port: str, db: str):
+USER = os.environ.get("POSTGRES_USER")
+PASSWORD = os.environ.get("POSTGRES_PASSWORD")
+HOST = os.environ.get("POSTGRES_HOST")
+PORT = os.environ.get("POSTGRES_PORT")
+DB_NAME = os.environ.get("POSTGRES_NAME")
 
-    database_url = f"postgresql://{user}:{password}@{host}:{port}/{db}"
+
+def get_engine():
+
+    database_url = f"postgresql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}"
 
     if database_exists(database_url) == False:
         create_database(database_url)
@@ -15,7 +25,7 @@ def get_engine(user: str, password: str, host: str, port: str, db: str):
     return engine
 
 
-db_engine = get_engine("postgres", "password", "localhost", "5432", "postgresV4")
+db_engine = get_engine()
 
 
 SessionLocal = sessionmaker(bind=db_engine)

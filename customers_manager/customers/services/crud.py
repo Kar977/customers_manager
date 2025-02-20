@@ -1,12 +1,11 @@
-from fastapi.responses import JSONResponse
-from sqlalchemy.sql import exists
-
 from customers.services.exceptions import (
     ResourceDoesNotExistException,
     WrongStatusException,
     ResourceAlreadyExistException,
 )
 from database_structure.models import Customer, Slot, WorkDay, SlotToHour
+from fastapi.responses import JSONResponse
+from sqlalchemy.sql import exists
 
 
 class VisitationManager:
