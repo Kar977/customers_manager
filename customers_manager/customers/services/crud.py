@@ -210,7 +210,7 @@ class WorkdayManager:
 
         return open_days_list
 
-    def put_slot_to_available(self, slot_id, db):
+    def put_new_slot_status(self, slot_id, slot_status, db):
 
         slot_obj = db.query(Slot).filter(Slot.id == slot_id).first()
 
@@ -218,10 +218,10 @@ class WorkdayManager:
             raise ResourceDoesNotExistException(
                 resource_name="slot", unit="ID", identification_mark=str(slot_id)
             )
-        if slot_obj.slot_status == "available":
-            raise WrongStatusException(resource_name="slot", status="available")
+        if slot_status != "available" or "unavailable":
+            raise WrongStatusException(resource_name="slot", status=slot_status)
 
-        slot_obj.slot_status = "available"
+        slot_obj.slot_status = slot_status
         slot_obj.customer_id = None
 
         db.commit()

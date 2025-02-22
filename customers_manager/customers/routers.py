@@ -2,6 +2,7 @@ from customers.schemas import (
     CreateVisitRequest,
     DeleteCustomerRequest,
     SetSlotAvailableRequest,
+    SetSlotStatusRequest,
     CreateWorkdayRequest,
     DeleteWorkdayRequest,
     DeleteSlotRequest,
@@ -18,7 +19,7 @@ from fastapi.responses import JSONResponse
 router = APIRouter(prefix="/customers")
 
 
-@router.get("/slots/all/available/")
+@router.get("/slots/available/")
 async def view_all_open_dates_with_at_least_one_slot_available(
     request: Request, db: SessionLocal = Depends(get_db)
 ):
@@ -26,7 +27,7 @@ async def view_all_open_dates_with_at_least_one_slot_available(
     return visitation_manager_obj.get_all_available_slots(db)
 
 
-@router.get("/slots/{slot_date}/available/")
+@router.get("/slots/available/{slot_date}")
 async def view_free_slots_on_specific_day(
     request: Request, slot_date: str, db: SessionLocal = Depends(get_db)
 ):
@@ -59,13 +60,13 @@ async def delete_customer(
     )
 
 
-@router.put("/slot/set/available/")
-async def set_slot_available(
-    slot_request: SetSlotAvailableRequest, db: SessionLocal = Depends(get_db)
+@router.put("/slot/status/")
+async def set_slot_status(
+    slot_request: SetSlotStatusRequest, db: SessionLocal = Depends(get_db)
 ):
 
-    return workday_manager_obj.put_slot_to_available(
-        slot_id=slot_request.slot_id, db=db
+    return workday_manager_obj.put_new_slot_status(
+        slot_id=slot_request.slot_id, slot_status=slot_request.slot_status, db=db
     )
 
 

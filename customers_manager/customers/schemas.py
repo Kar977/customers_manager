@@ -10,7 +10,8 @@ class CreateVisitRequest(BaseModel):
 class DeleteCustomerRequest(BaseModel):
     user_id: int
 
-class SetSlotAvailableRequest(BaseModel):
+class SetSlotStatusRequest(BaseModel):
+    status: str
     slot_id: int
 
 class DeleteSlotRequest(BaseModel):
