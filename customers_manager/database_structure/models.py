@@ -1,4 +1,4 @@
-from database_structure.database import db_engine
+from database_structure.database import sync_engine as db_engine
 from sqlalchemy import Column, Integer, String, DATE, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship, validates
 
@@ -85,6 +85,15 @@ class WorkDay(Base):
                 f"Invalid day_status: {day_status}. Must be one of {VALID_DAY_STATUS}"
             )
         return day_status
+
+    def __init__(self, date, day_status="open"):
+        self.date = date
+        self.day_status = day_status
+
+        self.slots = [
+            Slot(slot_nbr=i + 1, slot_status="available")
+            for i in range(len(VALID_HOURS))
+        ]
 
 
 class SlotToHour(Base):
