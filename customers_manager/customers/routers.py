@@ -11,10 +11,10 @@ from customers.services.crud import (
     workday_manager_obj,
     visitation_manager_obj,
 )
-from database_structure.database import get_db, SessionLocal
-from sqlalchemy.ext.asyncio import AsyncSession
+from database_structure.database import get_db
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/customers")
 
@@ -32,8 +32,10 @@ async def view_free_slots_on_specific_day(
     request: Request, slot_date: str, db: AsyncSession = Depends(get_db)
 ):
 
-    available_slots = await visitation_manager_obj.read_all_available_hours_on_specific_date(
-        slot_date, db
+    available_slots = (
+        await visitation_manager_obj.read_all_available_hours_on_specific_date(
+            slot_date, db
+        )
     )
     return JSONResponse({slot_date: available_slots})
 

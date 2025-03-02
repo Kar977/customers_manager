@@ -1,8 +1,10 @@
-from database_structure.database import sync_engine as db_engine
 from sqlalchemy import Column, Integer, String, DATE, ForeignKey
-from sqlalchemy.orm import declarative_base, relationship, validates
+from sqlalchemy.orm import relationship, validates, DeclarativeBase
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    pass
+
 
 VALID_HOURS = (
     "08:00",
@@ -119,6 +121,3 @@ class SlotToHour(Base):
                 f"Invalid hour: {hour}. Must be on in range of {VALID_HOURS}"
             )
         return hour
-
-
-Base.metadata.create_all(bind=db_engine)

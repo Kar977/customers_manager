@@ -1,13 +1,26 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi import Request
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 
 from customers import routers as customer_router
-from customers.services.exceptions import ResourceDoesNotExistException, ResourceAlreadyExistException, \
-    WrongStatusException
+from customers.services.exceptions import (
+    ResourceDoesNotExistException,
+    ResourceAlreadyExistException,
+    WrongStatusException,
+)
+from database_structure.database import init_db
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 def my_http_exception_handler(request: Request, exc: HTTPException):
