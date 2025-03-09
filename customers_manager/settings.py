@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     postgres_host: str = Field(default="customer-db")
     postgres_port: str = Field(default="5432")
     postgres_name: str = Field(default="postgres_db")
-    ASYNC_DATABASE_URL = ""
+    ASYNC_DATABASE_URL: str = f"postgresql+asyncpg://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_name}"
 
     @model_validator(mode='after')
     def db_url(self):

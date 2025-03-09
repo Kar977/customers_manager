@@ -49,6 +49,7 @@ async def create_visit(
         new_visit.name, new_visit.phone_nbr, new_visit.date, new_visit.slot, db
     )
 
+
     return visit_reservation
 
 

@@ -330,7 +330,6 @@ class WorkdayManager:
             status_code=202,
         )
 
-
 visitation_manager_obj = VisitationManager()
 customers_manager_obj = CustomersManager()
 workday_manager_obj = WorkdayManager()
