@@ -1,3 +1,5 @@
+import json
+
 from customers.schemas import (
     CreateVisitRequest,
     DeleteCustomerRequest,
@@ -15,6 +17,8 @@ from database_structure.database import get_db
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from customers.notification import send_email
+
 
 router = APIRouter(prefix="/customers")
 
@@ -49,6 +53,13 @@ async def create_visit(
         new_visit.name, new_visit.phone_nbr, new_visit.date, new_visit.slot, db
     )
 
+    if visit_reservation.status_code == 200:
+        data = json.loads(visit_reservation.body)
+        email_data = {
+            "title": "Visit booked",
+            "email_body": f"Hi,\nWe confirm your visit on {data.get('date')} at {data.get('hour')}.\nSee you at the site.",
+        }
+        await send_email(email_data)
 
     return visit_reservation
 
@@ -57,10 +68,19 @@ async def create_visit(
 async def delete_customer(
     customer_request: DeleteCustomerRequest, db: AsyncSession = Depends(get_db)
 ):
-
-    return await customers_manager_obj.delete_customer_and_release_slots(
+    delete_reservation = customers_manager_obj.delete_customer_and_release_slots(
         id_nbr=customer_request.user_id, db=db
     )
+
+    if delete_reservation.status_code == 200:
+        data = json.loads(delete_reservation.body)
+        email_data = {
+            "title": "Visit deleted",
+            "email_body": f"Hi, \nWe are sending you confirmation that your visit on {data.get('date')} at {data.get('hour')} has been deleted.",
+        }
+        await send_email(email_data)
+
+    return delete_reservation
 
 
 @router.put("/slot/status/")

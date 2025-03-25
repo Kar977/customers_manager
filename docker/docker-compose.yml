@@ -33,8 +33,20 @@ services:
       - "8001:8001"
     networks:
       - service_customer_network
+      - service_email_network
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - customer-db
+    networks:
+      - service_customer_network
 volumes:
   postgres_data:
 networks:
   service_customer_network:
+    external: true
+  service_email_network:
     external: true

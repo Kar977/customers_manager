@@ -27,4 +27,9 @@ async def after_create(target, connection, **kw):
     async with SessionLocal() as session:
         await insert_default_data(session)
 
-event.listen(SlotToHour.__table__, "after_create", lambda *args, **kwargs: asyncio.create_task(after_create(*args, **kwargs)))
+
+event.listen(
+    SlotToHour.__table__,
+    "after_create",
+    lambda *args, **kwargs: asyncio.create_task(after_create(*args, **kwargs)),
+)

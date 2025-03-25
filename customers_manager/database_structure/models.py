@@ -124,9 +124,11 @@ class SlotToHour(Base):
             )
         return hour
 
+
 DEFAULT_SLOTS = [
     {"slot_nbr": i, "hour": hour} for i, hour in enumerate(VALID_HOURS, start=1)
 ]
+
 
 async def insert_default_data(session: AsyncSession):
     result = await session.execute(select(SlotToHour))
