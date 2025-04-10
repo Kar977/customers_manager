@@ -1,37 +1,27 @@
-from contextlib import asynccontextmanager
-import pika
 import json
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi import Request
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 
-from customers import routers as customer_router
-from customers.services.exceptions import (
+from customers_manager.customers import routers as customer_router
+from customers_manager.customers.rabbitmq import rabbitmq
+from customers_manager.customers.services.exceptions import (
     ResourceDoesNotExistException,
     ResourceAlreadyExistException,
     WrongStatusException,
 )
-from database_structure.database import init_db
+from customers_manager.database_structure.database import init_db
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
-
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host="rabbitmq", port=5672)
-    )
-    channel = connection.channel()
-    channel.queue_declare(queue="email_queue", durable=True)
-
-    app.state.rabbit_connection = connection
-    app.state.rabbit_channel = channel
-
+    rabbitmq.connect()
     yield
-
-    app.state.rabbit_connection.close()
-
+    rabbitmq.close()
 
 app = FastAPI(lifespan=lifespan)
 
