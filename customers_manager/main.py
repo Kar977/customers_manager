@@ -23,6 +23,7 @@ async def lifespan(app: FastAPI):
     yield
     rabbitmq.close()
 
+
 app = FastAPI(lifespan=lifespan)
 
 

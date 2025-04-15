@@ -4,9 +4,7 @@ from pathlib import Path
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=Path(__file__).parent / ".env"
-    )
+    model_config = SettingsConfigDict(env_file=Path(__file__).parent / ".env")
     postgres_user: str = Field()
     postgres_password: str = Field()
     postgres_host: str = Field()

@@ -5,7 +5,12 @@ from customers_manager.customers.services.exceptions import (
     WrongStatusException,
     ResourceAlreadyExistException,
 )
-from customers_manager.database_structure.models import Customer, Slot, WorkDay, SlotToHour
+from customers_manager.database_structure.models import (
+    Customer,
+    Slot,
+    WorkDay,
+    SlotToHour,
+)
 from fastapi.responses import JSONResponse
 from sqlalchemy import and_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -278,14 +283,13 @@ class WorkdayManager:
         return JSONResponse({"action": "slot deleted", "slot_id": f"{slot_id}"})
 
     async def create_workday(self, date, db: AsyncSession, day_status="open"):
-        # lepiej uzywac get or create
         date = datetime.strptime(date, "%d.%m.%Y").date()
 
         stmt = select(WorkDay).where(WorkDay.date == date)
 
         result = await db.execute(stmt)
 
-        found_workday = (await result.scalars()).first() # tu było result.scalars().first()
+        found_workday = (await result.scalars()).first()
 
         if found_workday:
             raise ResourceAlreadyExistException(
@@ -311,7 +315,7 @@ class WorkdayManager:
         stmt = select(WorkDay).where(WorkDay.id == workday_id)
 
         result = await db.execute(stmt)
-        found_workday = (await result.scalars()).first() #ToDO sprawdzic czy aplikacja działą poprawnie z await - wczenisej bylo result.scalars().first()
+        found_workday = (await result.scalars()).first()
 
         if not found_workday:
             raise ResourceDoesNotExistException(

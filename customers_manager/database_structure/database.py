@@ -1,6 +1,10 @@
 import asyncio
 
-from customers_manager.database_structure.models import Base, SlotToHour, insert_default_data
+from customers_manager.database_structure.models import (
+    Base,
+    SlotToHour,
+    insert_default_data,
+)
 from customers_manager.settings import settings
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine

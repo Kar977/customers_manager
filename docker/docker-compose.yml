@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - postgres_data:/var/lib/postgresql/data # volumeny robic tak jak tutaj
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - service_customer_network
   customer-service:
@@ -44,7 +44,7 @@ services:
     networks:
       - service_customer_network
 volumes:
-  postgres_data: #volumeny robic tak jak tutaj - one sa zalecane
+  postgres_data:
 networks:
   service_customer_network:
     external: true

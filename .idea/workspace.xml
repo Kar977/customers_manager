@@ -5,15 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1d0aaada-e616-4b33-ad9c-ecdcf8906ec1" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/customers_manager/customers/notification.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/customers_manager/customers/routers.py" beforeDir="false" afterPath="$PROJECT_DIR$/customers_manager/customers/routers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/customers_manager/customers/services/crud.py" beforeDir="false" afterPath="$PROJECT_DIR$/customers_manager/customers/services/crud.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customers_manager/database_structure/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/customers_manager/database_structure/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customers_manager/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/customers_manager/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/customers_manager/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/customers_manager/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/.env.sample" beforeDir="false" afterPath="$PROJECT_DIR$/docker/.env.sample" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docker/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/docker/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_routers/test_create_customer.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_routers/test_create_visit.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_routers/test_create_visit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_routers/test_create_workday.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_routers/test_create_workday.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_routers/test_delete_customer.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_routers/test_delete_customer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_routers/test_get_slots.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_routers/test_get_slots.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_routers/test_routers.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_routers/test_routers.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

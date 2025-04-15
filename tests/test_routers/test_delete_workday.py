@@ -16,6 +16,7 @@ async def test_delete_workday(mock_db_session_with_existing_workday):
     mock_db_session_with_existing_workday.delete.assert_called()
     mock_db_session_with_existing_workday.commit.assert_called()
 
+
 @pytest.mark.asyncio()
 async def test_delete_workday_doesnt_exist(mock_empty_db_session):
     response = client.request("DELETE", "/customers/workday/", json={"workday_id": 1})
@@ -24,4 +25,3 @@ async def test_delete_workday_doesnt_exist(mock_empty_db_session):
 
     mock_empty_db_session.delete.assert_not_called()
     mock_empty_db_session.commit.assert_not_called()
-

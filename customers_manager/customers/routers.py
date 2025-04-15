@@ -23,14 +23,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 router = APIRouter(prefix="/customers")
 
 
-@router.get("/slots/available/") #ok
+@router.get("/slots/available/")
 async def view_all_open_dates_with_at_least_one_slot_available(
     request: Request, db: AsyncSession = Depends(get_db)
 ):
     return await visitation_manager_obj.get_all_available_slots(db)
 
 
-@router.get("/slots/available/{slot_date}") #ok
+@router.get("/slots/available/{slot_date}")
 async def view_free_slots_on_specific_day(
     request: Request, slot_date: str, db: AsyncSession = Depends(get_db)
 ):
@@ -43,7 +43,7 @@ async def view_free_slots_on_specific_day(
     return JSONResponse({slot_date: available_slots})
 
 
-@router.post("/visit/", status_code=201) #ok
+@router.post("/visit/", status_code=201)
 async def create_visit(
     new_visit: CreateVisitRequest, db: AsyncSession = Depends(get_db)
 ):
@@ -101,7 +101,7 @@ async def delete_slot(
     return await workday_manager_obj.delete_slot(slot_id=slot_request.slot_id, db=db)
 
 
-@router.post("/workday/", status_code=201) #ok
+@router.post("/workday/", status_code=201)
 async def create_workday(
     workday_request: CreateWorkdayRequest, db: AsyncSession = Depends(get_db)
 ):
@@ -110,7 +110,7 @@ async def create_workday(
     )
 
 
-@router.delete("/workday/", status_code=204) #ok
+@router.delete("/workday/", status_code=204)
 async def delete_workday(
     workday_request: DeleteWorkdayRequest, db: AsyncSession = Depends(get_db)
 ):
