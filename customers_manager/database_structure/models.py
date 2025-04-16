@@ -1,8 +1,12 @@
-from database_structure.database import sync_engine as db_engine
 from sqlalchemy import Column, Integer, String, DATE, ForeignKey
-from sqlalchemy.orm import declarative_base, relationship, validates
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import relationship, validates, DeclarativeBase
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    pass
+
 
 VALID_HOURS = (
     "08:00",
@@ -121,4 +125,15 @@ class SlotToHour(Base):
         return hour
 
 
-Base.metadata.create_all(bind=db_engine)
+DEFAULT_SLOTS = [
+    {"slot_nbr": i, "hour": hour} for i, hour in enumerate(VALID_HOURS, start=1)
+]
+
+
+async def insert_default_data(session: AsyncSession):
+    result = await session.execute(select(SlotToHour))
+    existing_data = result.scalars().all()
+
+    if not existing_data:
+        session.add_all([SlotToHour(**data) for data in DEFAULT_SLOTS])
+        await session.commit()

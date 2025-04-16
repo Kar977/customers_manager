@@ -1,16 +1,22 @@
-from customers.services.exceptions import (
+from datetime import datetime
+
+from customers_manager.customers.services.exceptions import (
     ResourceDoesNotExistException,
     WrongStatusException,
     ResourceAlreadyExistException,
 )
-from database_structure.models import Customer, Slot, WorkDay, SlotToHour
+from customers_manager.database_structure.models import (
+    Customer,
+    Slot,
+    WorkDay,
+    SlotToHour,
+)
 from fastapi.responses import JSONResponse
-from sqlalchemy.sql import exists
-
+from sqlalchemy import and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import and_
-from datetime import datetime
+from sqlalchemy.sql import exists
+
 
 class VisitationManager:
 
@@ -23,7 +29,10 @@ class VisitationManager:
         customer_obj = await self.customers_manager.get_or_create_customer(
             name, int(phone_nbr), db
         )
-        return await self.workday_manager.create_reservation(date, slot, customer_obj, db)
+
+        return await self.workday_manager.create_reservation(
+            date, slot, customer_obj, db
+        )
 
     async def read_all_available_hours_on_specific_date(self, date, db: AsyncSession):
         workday_obj = await self.workday_manager.get_all_slot_nbr_if_available_or_fail(
@@ -32,23 +41,18 @@ class VisitationManager:
         return await self.workday_manager.convert_slot_list_into_hours(workday_obj, db)
 
     async def get_all_available_slots(self, db: AsyncSession):
-
         available_slots_per_date_dict = {}
 
-        stmt = (
-            select(WorkDay, Slot, SlotToHour)
-            .where(
-                and_(
-                    Slot.slot_status == "available",
-                    WorkDay.id == Slot.workday_id,
-                    Slot.slot_nbr == SlotToHour.slot_nbr,
-                )
+        stmt = select(WorkDay, Slot, SlotToHour).where(
+            and_(
+                Slot.slot_status == "available",
+                WorkDay.id == Slot.workday_id,
+                Slot.slot_nbr == SlotToHour.slot_nbr,
             )
         )
 
         result = await db.execute(stmt)
         available_slots = result.all()
-
         for obj in available_slots:
             date_str = str(obj[0].date)
             if date_str not in available_slots_per_date_dict:
@@ -65,14 +69,12 @@ class CustomersManager:
         pass
 
     async def get_or_create_customer(self, name, phone_nbr, db: AsyncSession):
-        stmt = (select(Customer)
-            .where(
-                and_(
-                    Customer.name == name,
-                    Customer.phone_number == phone_nbr,
-                    )
-                )
+        stmt = select(Customer).where(
+            and_(
+                Customer.name == name,
+                Customer.phone_number == phone_nbr,
             )
+        )
 
         result = await db.execute(stmt)
         found_user = result.scalars().first()
@@ -97,9 +99,7 @@ class CustomersManager:
                 resource_name="customer", unit="ID", identification_mark=str(id_nbr)
             )
 
-        second_stmt = (
-            select(Slot).where(Slot.customer_id == customer.id)
-        )
+        second_stmt = select(Slot).where(Slot.customer_id == customer.id)
 
         second_result = await db.execute(second_stmt)
         slots_with_the_customer_reservation = second_result.scalars().all()
@@ -140,7 +140,6 @@ class WorkdayManager:
         result = await db.execute(stmt)
         workday = result.scalars().first()
 
-
         if workday.day_status == "closed":
             raise WrongStatusException(resource_name="workday", status="closed")
 
@@ -148,9 +147,8 @@ class WorkdayManager:
 
     async def get_slot_if_available_or_fail(self, workday, slot_nbr, db: AsyncSession):
 
-        stmt = (
-            select(Slot)
-            .where(Slot.workday_id == workday.id, Slot.slot_nbr == slot_nbr)
+        stmt = select(Slot).where(
+            Slot.workday_id == workday.id, Slot.slot_nbr == slot_nbr
         )
 
         result = await db.execute(stmt)
@@ -168,19 +166,12 @@ class WorkdayManager:
 
         date = datetime.strptime(date, "%d.%m.%Y").date()
         workday = await self.get_workday_if_exsist_and_open_or_fail(date, db)
-        stmt = (
-            select(Slot)
-                .where(
-                    and_(
-                        Slot.workday_id == workday.id,
-                        Slot.slot_status == "available"
-                    )
-            )
+        stmt = select(Slot).where(
+            and_(Slot.workday_id == workday.id, Slot.slot_status == "available")
         )
 
         results = await db.execute(stmt)
         available_slots = results.scalars().all()
-
         if available_slots is None:
             raise ResourceDoesNotExistException(
                 resource_name="slot",
@@ -189,20 +180,15 @@ class WorkdayManager:
             )
 
         available_slots_list = []
-
         for slot in available_slots:
             available_slots_list.append(slot.slot_nbr)
-
         return available_slots_list
 
     async def convert_slot_list_into_hours(self, slots: list, db: AsyncSession):
 
         hours_list = []
-
         for slot in slots:
-            stmt = (
-                select(SlotToHour).where(SlotToHour.slot_nbr == slot)
-            )
+            stmt = select(SlotToHour).where(SlotToHour.slot_nbr == slot)
             result = await db.execute(stmt)
             hour_query = result.scalars().first()
 
@@ -226,9 +212,7 @@ class WorkdayManager:
         slot_obj.customer_id = customer_obj.id
         await db.commit()
 
-        stmt = (
-            select(SlotToHour).where(SlotToHour.slot_nbr == slot_nbr)
-        )
+        stmt = select(SlotToHour).where(SlotToHour.slot_nbr == slot_nbr)
         result = await db.execute(stmt)
         hour_of_booked_visit = result.scalars().first()
 
@@ -299,19 +283,18 @@ class WorkdayManager:
         return JSONResponse({"action": "slot deleted", "slot_id": f"{slot_id}"})
 
     async def create_workday(self, date, db: AsyncSession, day_status="open"):
-
         date = datetime.strptime(date, "%d.%m.%Y").date()
 
         stmt = select(WorkDay).where(WorkDay.date == date)
 
         result = await db.execute(stmt)
-        found_workday = result.scalars().first()
+
+        found_workday = (await result.scalars()).first()
 
         if found_workday:
             raise ResourceAlreadyExistException(
                 resource_name="workday", unit="date", identification_mark=str(date)
             )
-
 
         new_workday = WorkDay(date=date, day_status=day_status)
         db.add(new_workday)
@@ -332,7 +315,7 @@ class WorkdayManager:
         stmt = select(WorkDay).where(WorkDay.id == workday_id)
 
         result = await db.execute(stmt)
-        found_workday = result.scalars().first()
+        found_workday = (await result.scalars()).first()
 
         if not found_workday:
             raise ResourceDoesNotExistException(

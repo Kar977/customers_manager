@@ -1,13 +1,37 @@
+import json
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi import Request
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 
-from customers import routers as customer_router
-from customers.services.exceptions import ResourceDoesNotExistException, ResourceAlreadyExistException, \
-    WrongStatusException
+from customers_manager.customers import routers as customer_router
+from customers_manager.customers.rabbitmq import rabbitmq
+from customers_manager.customers.services.exceptions import (
+    ResourceDoesNotExistException,
+    ResourceAlreadyExistException,
+    WrongStatusException,
+)
+from customers_manager.database_structure.database import init_db
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    rabbitmq.connect()
+    yield
+    rabbitmq.close()
+
+
+app = FastAPI(lifespan=lifespan)
+
+
+async def send_email_task(email_data: dict):
+    channel = app.state.rabbit_channel
+    channel.basic_publish(
+        exchange="", routing_key="email_queue", body=json.dumps(email_data)
+    )
 
 
 def my_http_exception_handler(request: Request, exc: HTTPException):
