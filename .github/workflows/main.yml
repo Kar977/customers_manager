@@ -79,7 +79,7 @@ jobs:
 
       - name: Check if API Gateway is running
         run: |
-          curl --fail http://localhost:8001//customers/slots/available/ || (echo "Customers manager not responding" && exit 1)
+          curl --fail http://localhost:8001/customers/slots/available/ || (echo "Customers manager not responding" && exit 1)
 
       - name: Tear down containers and networks
         if: always()
