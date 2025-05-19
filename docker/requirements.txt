@@ -10,3 +10,4 @@ pydantic-settings
 pika
 pytest
 httpx
+pytest-asyncio
