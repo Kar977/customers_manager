@@ -1,6 +1,7 @@
+from pathlib import Path
+
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pathlib import Path
 
 
 class Settings(BaseSettings):
@@ -10,13 +11,12 @@ class Settings(BaseSettings):
     postgres_host: str = Field()
     postgres_port: str = Field()
     postgres_name: str = Field()
-    ASYNC_DATABASE_URL: str = ""#(
-    #    f"postgresql+asyncpg://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_name}"
-    #)
+    ASYNC_DATABASE_URL: str = ""
 
     @model_validator(mode="after")
     def db_url(self):
-        self.ASYNC_DATABASE_URL = f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_name}"
+        self.ASYNC_DATABASE_URL = (f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@"
+                                   f"{self.postgres_host}:{self.postgres_port}/{self.postgres_name}")
         return self
 
 
