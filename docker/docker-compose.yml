@@ -3,7 +3,7 @@ services:
     image: postgres:15
     restart: always
     env_file:
-      - .env
+      - ../../.env
     environment:
       POSTGRES_DB: ${POSTGRES_NAME}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -19,8 +19,9 @@ services:
     restart: always
     depends_on:
       - customer-db
+      - email_service
     env_file:
-      - .env
+      - ../../.env
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -43,6 +44,38 @@ services:
       - customer-db
     networks:
       - service_customer_network
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - service_email_network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+  consumer:
+    image: 185894030054.dkr.ecr.eu-central-1.amazonaws.com/email-notification-consumer
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - service_email_network
+  email_service:
+    image: 185894030054.dkr.ecr.eu-central-1.amazonaws.com/email-notification-manager-service
+    restart: always
+    ports:
+      - "9000:9000"
+    depends_on:
+      - rabbitmq
+      - consumer
+    networks:
+      - service_email_network
+
+
 volumes:
   postgres_data:
 networks:

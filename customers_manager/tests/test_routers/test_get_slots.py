@@ -3,8 +3,8 @@ from unittest.mock import MagicMock
 import pytest
 from fastapi.testclient import TestClient
 
-from customers_manager.customers.services.crud import WorkdayManager
-from customers_manager.main import app
+from customers.services.crud import WorkdayManager
+from main import app
 
 client = TestClient(app)
 

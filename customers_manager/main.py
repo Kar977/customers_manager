@@ -6,14 +6,14 @@ from fastapi import Request
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 
-from customers_manager.customers import routers as customer_router
-from customers_manager.customers.rabbitmq import rabbitmq
-from customers_manager.customers.services.exceptions import (
+from customers import routers as customer_router
+from customers.rabbitmq import rabbitmq
+from customers.services.exceptions import (
     ResourceDoesNotExistException,
     ResourceAlreadyExistException,
     WrongStatusException,
 )
-from customers_manager.database_structure.database import init_db
+from database_structure.database import init_db
 
 
 @asynccontextmanager
