@@ -36,8 +36,21 @@ jobs:
           
       - name: Write .env file from GitHub Secret
         run: |
-          mkdir -p employee_manager/employee_manager
+          echo "przed cd w zapisie"
+          pwd
+          cd ..
+          cd ..
+          echo "po cd w zapisie"
+          pwd
           printf "%s" "${{ secrets.CUSTOMER_ENV_FILE }}" > customers_manager/.env
+
+
+      - name: Check .env presence
+        run: |
+          echo "Looking for .env..."
+          find . -name ".env"
+          echo "--- .env content ---"
+          cat customers_manager/.env || echo "NOT FOUND"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
