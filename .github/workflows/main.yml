@@ -1,0 +1,77 @@
+name: Docker Compose Check
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  docker-compose-test:
+    runs-on: ubuntu-latest
+
+    env:
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_NAME: ${{ secrets.POSTGRES_NAME }}
+      POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+      POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Create external Docker networks
+        run: |
+          docker network create service_customer_network || true
+          docker network create service_email_network || true
+          
+      - name: Write .env file from GitHub Secret
+        run: |
+          mkdir -p employee_manager/employee_manager
+          printf "%s" "${{ secrets.CUSTOMER_ENV_FILE }}" > customers_manager/.env
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Log in to Amazon ECR
+        run: |
+          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.eu-central-1.amazonaws.com
+
+      - name: Build and start containers
+        working-directory: docker
+        run: |  
+          echo "Current working directory:"
+          pwd
+          docker-compose up -d --build
+
+      - name: Wait for services to start
+        run: |
+          echo "Waiting for services to become healthy..."
+          sleep 20
+            
+          docker ps -a
+
+      - name: Check if API Gateway is running
+        run: |
+          curl --fail http://localhost:8001//customers/slots/available/ || (echo "Customers manager not responding" && exit 1)
+
+      - name: Tear down containers and networks
+        if: always()
+        working-directory: docker
+        run: |
+          docker-compose down -v
+          docker network rm service_customer_network || true
+          docker network rm service_email_network || true
