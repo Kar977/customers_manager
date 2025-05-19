@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from customers_manager.customers.services.exceptions import (
+from customers.services.exceptions import (
     ResourceDoesNotExistException,
     WrongStatusException,
     ResourceAlreadyExistException,
 )
-from customers_manager.database_structure.models import (
+from database_structure.models import (
     Customer,
     Slot,
     WorkDay,

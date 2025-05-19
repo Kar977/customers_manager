@@ -10,9 +10,9 @@ class Settings(BaseSettings):
     postgres_host: str = Field()
     postgres_port: str = Field()
     postgres_name: str = Field()
-    ASYNC_DATABASE_URL: str = (
-        f"postgresql+asyncpg://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_name}"
-    )
+    ASYNC_DATABASE_URL: str = ""#(
+    #    f"postgresql+asyncpg://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_name}"
+    #)
 
     @model_validator(mode="after")
     def db_url(self):

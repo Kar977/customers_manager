@@ -1,9 +1,9 @@
 from datetime import date
 from unittest.mock import AsyncMock, MagicMock
 import pytest
-from customers_manager.database_structure.database import get_db
-from customers_manager.main import app
-from customers_manager.database_structure.models import (
+from database_structure.database import get_db
+from main import app
+from database_structure.models import (
     WorkDay,
     Slot,
     SlotToHour,

@@ -1,8 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from customers_manager.customers.rabbitmq import RabbitMQConnection
-from customers_manager.main import app
+from customers.rabbitmq import RabbitMQConnection
+from main import app
 
 client = TestClient(app)
 

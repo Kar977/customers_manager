@@ -1,8 +1,8 @@
 import json
 from http import HTTPStatus
 
-from customers_manager.customers.rabbitmq import rabbitmq
-from customers_manager.customers.schemas import (
+from customers.rabbitmq import rabbitmq
+from customers.schemas import (
     CreateVisitRequest,
     DeleteCustomerRequest,
     SetSlotStatusRequest,
@@ -10,12 +10,12 @@ from customers_manager.customers.schemas import (
     DeleteWorkdayRequest,
     DeleteSlotRequest,
 )
-from customers_manager.customers.services.crud import (
+from customers.services.crud import (
     customers_manager_obj,
     workday_manager_obj,
     visitation_manager_obj,
 )
-from customers_manager.database_structure.database import get_db
+from database_structure.database import get_db
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
