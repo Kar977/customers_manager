@@ -10,7 +10,7 @@ class RabbitMQConnection:
 
     def connect(self):
         self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host="rabbitmq", port=5672)
+            pika.ConnectionParameters(host="rabbitmq", port=5672, heartbeat=30, blocked_connection_timeout=60)
         )
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue="email_queue", durable=True)
