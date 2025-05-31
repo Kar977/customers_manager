@@ -46,3 +46,23 @@ The following secrets are required (via GitHub Secrets or a local `.env` file):
    `http://localhost:8001`
 
 >In production, the service is accessible only through the API Gateway.
+### Running Tests
+Run all tests using
+```
+python -m pytest
+```
+
+### Deployment
+This microservice is containerized and deployed via AWS ECR and Portainer on EC2.
+
+### CI/CD Workflow (GitHub Actions)
+1. Lint & Test
+Validates code and runs unit/integration tests.
+
+2. Smoke Test
+Builds and runs the container to verify basic functionality.
+
+3. Build & Push
+Pushes Docker image to AWS ECR.
+
+Final deployment on EC2 is handled manually through Portainer.
